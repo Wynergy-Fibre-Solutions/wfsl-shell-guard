@@ -1,0 +1,7 @@
+{
+  "name": "wfsl-shell-guard",
+  "version": "1.0.0",
+  "description": "PowerShell execution safety guard to prevent pasting console output as commands.",
+  "license": "MIT",
+  "private": false
+}

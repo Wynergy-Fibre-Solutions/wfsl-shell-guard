@@ -1,38 +1,29 @@
-# WFSL Shell Guard (Community Edition)
+# WFSL Shell Guard
 
-A lightweight PowerShell safety guard that prevents users from accidentally
-pasting console output, error traces, or log text back into an active shell.
+WFSL Shell Guard provides deterministic protection against accidental execution of
+pasted or malformed PowerShell content.
 
-## Why this exists
+It is designed to prioritise operator intent, safety, and predictability in
+interactive shell environments.
 
-PowerShell users frequently copy terminal output and re-paste it by mistake,
-causing cascading errors and confusion.
+## Governance
+This project is governed under WFSL Pro Authority principles.
 
-WFSL Shell Guard blocks that class of failure before it executes.
+Behaviour, guarantees, and change control are defined in:
+- SPEC.md
+- GOVERNANCE.md
 
-## What it does
+## Evidence and Provenance (Optional)
+Where auditability or compliance requirements apply, execution context or outcomes
+may be verified using:
 
-- Detects pasted PowerShell output, not commands
-- Stops execution safely
-- Explains the mistake clearly
-- Zero telemetry
+- WFSL Evidence Guard Pro v0.1.0
+  https://github.com/Wynergy-Fibre-Solutions/wfsl-evidence-guard-pro/releases/tag/v0.1.0
+
+Evidence verification is optional and not required for normal operation.
+
+## Guarantees
+- No telemetry
 - No network access
-- No dependencies
-
-## Intended use
-
-- Education
-- Developer hygiene
-- Regulated environments
-- Support desks
-- Training sessions
-
-## Status
-
-Community edition. Free. Stable.
-
-This tool emits no telemetry and performs no tracking.
-
-## Licence
-
-MIT
+- Deterministic behaviour
+- Immutable releases

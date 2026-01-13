@@ -1,0 +1,23 @@
+﻿{
+    "timestamp":  "2026-01-13T15:12:46.5913513+00:00",
+    "status":  "completed",
+    "findings":  {
+                     "executionPolicy":  {
+                                             "ok":  false,
+                                             "name":  "Get-ExecutionPolicy",
+                                             "value":  null,
+                                             "error":  {
+                                                           "type":  "System.Management.Automation.CommandNotFoundException",
+                                                           "message":  "The \u0027Get-ExecutionPolicy\u0027 command was found in the module \u0027Microsoft.PowerShell.Security\u0027, but the module could not be loaded. For more information, run \u0027Import-Module Microsoft.PowerShell.Security\u0027."
+                                                       }
+                                         }
+                 },
+    "outputs":  {
+                    "environment":  {
+                                        "path":  "evidence\\local-machine\\environment.json"
+                                    },
+                    "executionContext":  {
+                                             "path":  "evidence\\local-machine\\execution-context.json"
+                                         }
+                }
+}

@@ -1,88 +1,44 @@
 # WFSL Shell Guard
 
-**Execution safety guard for PowerShell and shell environments.**
+**Execution safety guard for PowerShell environments.**
 
-WFSL Shell Guard prevents accidental execution of pasted console output, transcripts, or documentation by enforcing explicit execution boundaries.
+WFSL Shell Guard prevents accidental execution of pasted output, logs, or malformed commands in interactive PowerShell sessions.
 
-It is designed for operators and teams working in hostile, opaque, or error-prone shell environments where intent must be protected.
+It is designed for correctness-first operators working in sensitive or irreversible environments.
 
 ---
 
 ## What this does
 
-WFSL Shell Guard:
+- Detects pasted content that is not valid PowerShell intent
+- Blocks execution of logs, transcripts, or copied output
+- Reduces operator-induced execution faults
+- Provides deterministic pass or fail outcomes
 
-- Detects pasted console output and transcript artefacts
-- Prevents accidental execution of non-code text
-- Forces explicit operator intent before execution
-- Reduces destructive copy-paste errors
-- Operates locally with no network access
-
-The guard is intentionally simple, deterministic, and non-invasive.
+Nothing is inferred. Nothing is silently corrected.
 
 ---
 
 ## Why this exists
 
-Modern shells do not distinguish clearly between:
+Shell environments are dangerous by default.
 
-- Commands
-- Output
-- Documentation
-- Logs
-- Human-readable text
+WFSL Shell Guard enforces a simple rule:
 
-This leads to a common and dangerous failure mode:  
-**pasted output being executed as commands**.
+> **If execution intent is ambiguous, execution is denied.**
 
-WFSL Shell Guard enforces a hard boundary between observation and execution.
+This reduces:
+- Accidental command execution
+- Copy-paste induced outages
+- Operator error in high-pressure environments
 
 ---
 
-## Design principles
+## Relationship to WFSL Core
 
-- No inference
-- No heuristics
-- No telemetry
-- No background services
-- Explicit execution only
+WFSL Shell Guard implements the governance and verification principles defined in **WFSL Core**.
 
-The guard assumes the platform is unreliable and protects the operator accordingly.
-
----
-
-## Deterministic verification
-
-This repository includes a deterministic verification harness.
-
-Verification runs:
-
-- Declare execution context explicitly
-- Do not rely on shell introspection
-- Emit machine-verifiable evidence
-- Do not modify system state
-
-Generated artefacts include:
-
-- `environment.json`
-- `execution-context.json`
-- `run-*.json`
-
-These artefacts demonstrate observed behaviour only.
-
----
-
-## Intended use
-
-WFSL Shell Guard is suitable for:
-
-- Engineers
-- Operators
-- Incident response
-- Regulated environments
-- High-risk production systems
-
-It is intentionally opinionated and conservative.
+It does not define its own trust, licence, or reliance model.
 
 ---
 
@@ -92,9 +48,9 @@ This repository is available under the **WFSL Community Edition**.
 
 Source code access, local execution, and experimentation are permitted.
 
-**Production reliance, audit claims, or regulatory use are not permitted** without a Commercial Reliance Licence.
+**Production reliance, audit claims, regulatory positioning, or commercial use are not permitted** without a Commercial Reliance Licence.
 
-Verified tags and verification artefacts demonstrate observed behaviour only and do not grant permission to rely.
+Verification artefacts demonstrate observed behaviour only and do not grant permission to rely.
 
 See the canonical framework:
 
@@ -108,9 +64,9 @@ licensing@wfsl.uk
 
 ## Status
 
-- Verification: complete
-- Deterministic evidence: emitted
-- Network access: none
-- Telemetry: none
+- Governance aligned: yes
+- Licence boundary enforced: yes
+- Runtime guarantees: none implied
+- Behaviour: unchanged
 
-This repository reflects a verified, non-reliant community release.
+This tool is intentionally conservative.

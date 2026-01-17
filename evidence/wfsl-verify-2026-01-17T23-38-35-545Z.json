@@ -1,0 +1,41 @@
+{
+  "wfsl_verification": "WFSL-LOCAL-VERIFY-v1",
+  "repo": {
+    "path": "C:\\Users\\Paul Wynn\\github\\wfsl-shell-guard",
+    "remote": "https://github.com/Wynergy-Fibre-Solutions/wfsl-shell-guard.git",
+    "head": "b23af119dfcb4af81178843088fed753dac0c12b"
+  },
+  "timestamp_utc": "2026-01-17T23-38-35-545Z",
+  "checks": {
+    "required_files_present": true,
+    "missing_files": [],
+    "license_apache_2_0_detected": true
+  },
+  "artifacts": {
+    "required_files": [
+      {
+        "path": "LICENSE",
+        "exists": true,
+        "sha256": "b6964a2f979d70c84f12071847a1b770925bb344cebc292d02dbd47924316176"
+      },
+      {
+        "path": "README.md",
+        "exists": true,
+        "sha256": "b8dd25c0a8bab5c8575b2cab2ec2bf2604ad2b0ce06db52398df61622ed0b4ec"
+      },
+      {
+        "path": "GOVERNANCE.md",
+        "exists": true,
+        "sha256": "e4825fa1835a92c72fbada8cf64a46d12d248080206ab7abf31ceb3c15fee94c"
+      },
+      {
+        "path": "VERIFICATION.md",
+        "exists": true,
+        "sha256": "387e7660932c49f18ddde7677aa6cf69861a56fbcadf97a1a34bd56d323b62ba"
+      }
+    ]
+  },
+  "outcome": {
+    "pass": true
+  }
+}

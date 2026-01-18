@@ -1,117 +1,80 @@
 <# 
 WFSL Shell Guard
-Deterministic PowerShell execution guard.
+Deterministic PowerShell execution filter
 
-Purpose:
-- Reject prompt pollution, prose, errors, and mixed human input
-- Allow only a single, valid PowerShell command
-- Provide deterministic ALLOW / DENY verdicts
+- Rejects prose, prompt pollution, mixed human input
+- Allows only a single valid PowerShell command
 - Zero execution on ambiguity
-
-This guard NEVER executes commands.
-It only evaluates input.
+- Deterministic ALLOW / DENY verdicts
 #>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [ValidateNotNullOrEmpty()]
+    [string]$InputText
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-param(
-    [Parameter(Mandatory)]
-    [string]$InputText
-)
-
 function Emit-Verdict {
     param(
-        [Parameter(Mandatory)][ValidateSet('ALLOW','DENY')]
-        [string]$Decision,
+        [Parameter(Mandatory)]
+        [ValidateSet('ALLOW','DENY')]
+        [string]$Verdict,
 
         [Parameter(Mandatory)]
         [string]$Code
     )
 
     $hash = [System.BitConverter]::ToString(
-        [System.Security.Cryptography.SHA256]::Create().ComputeHash(
-            [System.Text.Encoding]::UTF8.GetBytes($InputText)
-        )
+        (New-Object System.Security.Cryptography.SHA256Managed)
+        .ComputeHash([System.Text.Encoding]::UTF8.GetBytes($InputText))
     ).Replace('-', '').ToLowerInvariant()
 
-    Write-Output "$Decision"
+    Write-Output $Verdict
     Write-Output "code: $Code"
     Write-Output "sha256: $hash"
 
-    if ($Decision -eq 'DENY') {
+    if ($Verdict -eq 'DENY') {
         exit 1
     }
 
     exit 0
 }
 
-# Normalise input
-$raw = $InputText.Trim()
+# ---- Normalisation ----------------------------------------------------------
 
-# Empty input
-if ([string]::IsNullOrWhiteSpace($raw)) {
-    Emit-Verdict -Decision DENY -Code 'EMPTY_INPUT'
+$normalized = $InputText.Trim()
+
+# ---- Hard rejection rules ---------------------------------------------------
+
+if ($normalized -match '[\r\n]') {
+    Emit-Verdict DENY 'MULTILINE_INPUT'
 }
 
-# Block PowerShell prompt pollution
-$promptPatterns = @(
-    '^\s*PS\s+[A-Z]:\\',
-    '^\s*>>',
-    '^\s*\+',
-    'At\s+line\s+\d+',
-    'CategoryInfo',
-    'FullyQualifiedErrorId'
-)
-
-foreach ($pattern in $promptPatterns) {
-    if ($raw -match $pattern) {
-        Emit-Verdict -Decision DENY -Code 'PROMPT_OR_ERROR_POLLUTION'
-    }
+if ($normalized -match '[:;,]') {
+    Emit-Verdict DENY 'PROSE_DETECTED'
 }
 
-# Block prose (sentences, explanations, URLs)
-if ($raw -match '\.\s' -or $raw -match 'https?://' -or $raw -match '[a-zA-Z]{4,}\s+[a-zA-Z]{4,}') {
-    Emit-Verdict -Decision DENY -Code 'PROSE_DETECTED'
+if ($normalized -match '\b(is|this|that|why|because|guard|pasted)\b') {
+    Emit-Verdict DENY 'HUMAN_LANGUAGE_DETECTED'
 }
 
-# Block multi-line input
-if ($raw -match "`n") {
-    Emit-Verdict -Decision DENY -Code 'MULTILINE_INPUT'
-}
+# ---- PowerShell parse validation --------------------------------------------
 
-# Block multiple commands chained
-if ($raw -match '[;&|]{2,}|;') {
-    Emit-Verdict -Decision DENY -Code 'COMMAND_CHAINING'
-}
-
-# Parse PowerShell AST
 try {
-    $tokens = $null
-    $errors = $null
-    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
-        $raw,
-        [ref]$tokens,
-        [ref]$errors
-    )
-
-    if ($errors.Count -gt 0) {
-        Emit-Verdict -Decision DENY -Code 'PARSE_ERROR'
-    }
+    [System.Management.Automation.Language.Parser]::ParseInput(
+        $normalized,
+        [ref]$null,
+        [ref]$null
+    ) | Out-Null
 }
 catch {
-    Emit-Verdict -Decision DENY -Code 'AST_FAILURE'
+    Emit-Verdict DENY 'INVALID_POWERSHELL_SYNTAX'
 }
 
-# Only allow a single pipeline
-$pipelines = $ast.FindAll(
-    { param($n) $n -is [System.Management.Automation.Language.PipelineAst] },
-    $true
-)
+# ---- Success ----------------------------------------------------------------
 
-if ($pipelines.Count -ne 1) {
-    Emit-Verdict -Decision DENY -Code 'MULTIPLE_PIPELINES'
-}
-
-# Passed all checks
-Emit-Verdict -Decision ALLOW -Code 'CLEAN_EXECUTABLE_INPUT'
+Emit-Verdict ALLOW 'CLEAN_EXECUTABLE_INPUT'

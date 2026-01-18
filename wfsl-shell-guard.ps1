@@ -28,10 +28,10 @@ function Emit-Verdict {
         [string]$Code
     )
 
-    $hash = [System.BitConverter]::ToString(
-        (New-Object System.Security.Cryptography.SHA256Managed)
-        .ComputeHash([System.Text.Encoding]::UTF8.GetBytes($InputText))
-    ).Replace('-', '').ToLowerInvariant()
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($InputText)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $hashBytes = $sha.ComputeHash($bytes)
+    $hash = ([System.BitConverter]::ToString($hashBytes)).Replace('-', '').ToLowerInvariant()
 
     Write-Output $Verdict
     Write-Output "code: $Code"

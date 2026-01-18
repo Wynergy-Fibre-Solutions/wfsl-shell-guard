@@ -1,40 +1,40 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+WFSL Guard Licence – Standalone (Foundational)
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+Copyright (c) Wynergy Fibre Solutions Ltd.
 
-   1. Definitions.
+Permission is granted to use this software subject to the terms below.
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+1. Scope
+This licence grants the licensee the right to use the WFSL Shell Guard
+as a standalone software component for execution safety and control purposes.
 
-      "Licensor" shall mean the copyright owner or entity authorised by
-      the copyright owner that is granting the License.
+2. Standalone Grant
+This licence applies only to the software contained in this repository.
+No rights are granted to any other WFSL software, tools, services, or systems
+unless explicitly licensed separately.
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+3. Future Bundling
+Wynergy Fibre Solutions Ltd reserves the right to offer this software
+as part of a bundled or tiered licence package in the future.
+Such bundling does not revoke or diminish rights granted under this standalone licence.
 
-   2. Grant of Copyright License.
+4. No Implied Entitlement
+This licence does not imply entitlement to:
+- Updates beyond the licensed version
+- Support services
+- Other WFSL components
+- Governance, control-plane, or evidence systems
 
-      Subject to the terms and conditions of this License, each Contributor
-      hereby grants to You a perpetual, worldwide, non-exclusive, no-charge,
-      royalty-free, irrevocable copyright license.
+5. No Warranty
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to fitness for purpose,
+merchantability, or non-infringement.
 
-   3. Grant of Patent License.
+6. Limitation of Liability
+In no event shall Wynergy Fibre Solutions Ltd be liable for any damages
+arising from the use or inability to use this software.
 
-      Subject to the terms and conditions of this License, each Contributor
-      hereby grants to You a perpetual, worldwide, non-exclusive, no-charge,
-      royalty-free, irrevocable patent license.
-
-   4. Redistribution.
-
-      You must give any other recipients of the Work a copy of this License.
-
-   7. Disclaimer of Warranty.
-
-      Unless required by applicable law or agreed to in writing, Licensor
-      provides the Work on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
-      OF ANY KIND.
-
-   END OF TERMS AND CONDITIONS
+7. Governing Authority
+This software operates under the WFSL Control and Execution Governance Charter.
+The authoritative charter is published at:
+https://github.com/Wynergy-Fibre-Solutions/wfsl-core

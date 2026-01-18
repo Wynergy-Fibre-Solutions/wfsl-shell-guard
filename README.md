@@ -1,8 +1,13 @@
-notepad.exe "README.md"
-# wfsl-shell-guard
+## Governance alignment
 
-Lightweight PowerShell execution safety guard.
+WFSL Shell Guard operates under the authority of the
+WFSL Control and Execution Governance Charter.
 
-This tool prevents accidental execution of pasted or malformed console output by enforcing explicit execution boundaries.
+The charter defines the non-negotiable principles governing execution authority,
+deny-by-default posture, and control boundaries across WFSL systems.
 
-Verified by WFSL software and CI.
+This project implements execution-level controls that are justified by,
+and subordinate to, that charter.
+
+Authoritative charter:
+https://github.com/Wynergy-Fibre-Solutions/wfsl-core/blob/main/WFSL_CONTROL_EXECUTION_GOVERNANCE_CHARTER.md

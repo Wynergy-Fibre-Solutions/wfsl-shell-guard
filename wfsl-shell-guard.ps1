@@ -1,80 +1,191 @@
-<# 
-WFSL Shell Guard
-Deterministic PowerShell execution filter
-
-- Rejects prose, prompt pollution, mixed human input
-- Allows only a single valid PowerShell command
-- Zero execution on ambiguity
-- Deterministic ALLOW / DENY verdicts
-#>
-
-[CmdletBinding()]
-param(
-    [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateNotNullOrEmpty()]
-    [string]$InputText
-)
+# wfsl-shell-guard.ps1
+# WFSL PowerShell Guard Standard (WFSL-PSG-1.0) compliant: single JSON object on stdout, no human language on stdout.
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = "Stop"
 
-function Emit-Verdict {
-    param(
-        [Parameter(Mandatory)]
-        [ValidateSet('ALLOW','DENY')]
-        [string]$Verdict,
+# Force UTF-8 stdout (no BOM). Adapters still normalise, but we prefer clean emission.
+try {
+  $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+  [Console]::OutputEncoding = $utf8NoBom
+} catch {
+  # If this fails, we still enforce single JSON object output below.
+}
 
-        [Parameter(Mandatory)]
-        [string]$Code
-    )
+function Get-Sha256Hex {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string] $Text
+  )
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    $hash = $sha.ComputeHash($bytes)
+    return ($hash | ForEach-Object { $_.ToString("x2") }) -join ""
+  } finally {
+    $sha.Dispose()
+  }
+}
 
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($InputText)
-    $sha = [System.Security.Cryptography.SHA256]::Create()
-    $hashBytes = $sha.ComputeHash($bytes)
-    $hash = ([System.BitConverter]::ToString($hashBytes)).Replace('-', '').ToLowerInvariant()
+function DeepSort {
+  param([Parameter(Mandatory = $true)] $Value)
 
-    Write-Output $Verdict
-    Write-Output "code: $Code"
-    Write-Output "sha256: $hash"
+  if ($null -eq $Value) { return $null }
 
-    if ($Verdict -eq 'DENY') {
-        exit 1
+  if ($Value -is [System.Collections.IDictionary]) {
+    $out = [ordered]@{}
+    foreach ($k in ($Value.Keys | Sort-Object)) {
+      $out[$k] = DeepSort -Value $Value[$k]
     }
+    return $out
+  }
 
-    exit 0
+  if ($Value -is [System.Collections.IEnumerable] -and -not ($Value -is [string])) {
+    $arr = @()
+    foreach ($item in $Value) { $arr += (DeepSort -Value $item) }
+    return $arr
+  }
+
+  return $Value
 }
 
-# ---- Normalisation ----------------------------------------------------------
-
-$normalized = $InputText.Trim()
-
-# ---- Hard rejection rules ---------------------------------------------------
-
-if ($normalized -match '[\r\n]') {
-    Emit-Verdict DENY 'MULTILINE_INPUT'
+function StableJson {
+  param([Parameter(Mandatory = $true)] $Object)
+  # ConvertTo-Json ordering is not guaranteed. We pre-sort dictionaries.
+  $sorted = DeepSort -Value $Object
+  return ($sorted | ConvertTo-Json -Depth 50 -Compress)
 }
 
-if ($normalized -match '[:;,]') {
-    Emit-Verdict DENY 'PROSE_DETECTED'
+function Emit-JsonAndExit {
+  param(
+    [Parameter(Mandatory = $true)]
+    [hashtable] $Evidence,
+    [Parameter(Mandatory = $true)]
+    [int] $ExitCode
+  )
+
+  # PSG: evidence must not be empty.
+  if ($null -eq $Evidence -or $Evidence.Keys.Count -eq 0) {
+    $Evidence = @{
+      error = @{
+        schema_version = "wfsl-error.v1"
+        error_class    = "WFSL_SHELL_GUARD_FAILURE"
+        message        = "Evidence object empty"
+        timestamp_utc  = (Get-Date).ToUniversalTime().ToString("o")
+      }
+    }
+    $ExitCode = 1
+  }
+
+  $json = StableJson -Object $Evidence
+  # PSG: exactly one JSON object on stdout, nothing else.
+  [Console]::Out.Write($json)
+  exit $ExitCode
 }
 
-if ($normalized -match '\b(is|this|that|why|because|guard|pasted)\b') {
-    Emit-Verdict DENY 'HUMAN_LANGUAGE_DETECTED'
-}
+param(
+  # Input text to evaluate. Guard logic may deny human language or non-structured payloads.
+  [Parameter(Mandatory = $false)]
+  [string] $InputText = "",
 
-# ---- PowerShell parse validation --------------------------------------------
+  # Optional: strict mode. When set, empty input is denied.
+  [Parameter(Mandatory = $false)]
+  [switch] $Strict
+)
 
 try {
-    [System.Management.Automation.Language.Parser]::ParseInput(
-        $normalized,
-        [ref]$null,
-        [ref]$null
-    ) | Out-Null
-}
-catch {
-    Emit-Verdict DENY 'INVALID_POWERSHELL_SYNTAX'
-}
+  $now = (Get-Date).ToUniversalTime().ToString("o")
 
-# ---- Success ----------------------------------------------------------------
+  # Deterministic input hash. Empty string is allowed unless -Strict.
+  $input = $InputText
+  if ($Strict -and ([string]::IsNullOrWhiteSpace($input))) {
+    $payload = @{
+      verdict = "DENY"
+      code    = "EMPTY_INPUT"
+      input_sha256 = "sha256:" + (Get-Sha256Hex -Text "")
+    }
 
-Emit-Verdict ALLOW 'CLEAN_EXECUTABLE_INPUT'
+    $evidence = @{
+      schema_version = "wfsl-shell-guard.v1"
+      timestamp_utc  = $now
+      timestamp_trust = "system-clock"
+      producer = @{
+        system    = "wfsl-shell-guard"
+        component = "guard"
+        language  = "powershell"
+      }
+      payload = $payload
+    }
+
+    Emit-JsonAndExit -Evidence $evidence -ExitCode 2
+  }
+
+  $inputSha = "sha256:" + (Get-Sha256Hex -Text $input)
+
+  # Guard rule: detect "human language" heuristically.
+  # Deterministic, low-risk heuristic: alphabetic words and spaces above a threshold.
+  $isHumanLanguage = $false
+  if (-not [string]::IsNullOrWhiteSpace($input)) {
+    $letters = ([regex]::Matches($input, "[A-Za-z]").Count)
+    $spaces  = ([regex]::Matches($input, "\s").Count)
+    $len = $input.Length
+
+    # Simple ratio rule: if letters are significant and spaces exist, treat as human-language-like.
+    if ($len -ge 12 -and $letters -ge 6 -and $spaces -ge 1) { $isHumanLanguage = $true }
+  }
+
+  if ($isHumanLanguage) {
+    $payload = @{
+      verdict     = "DENY"
+      code        = "HUMAN_LANGUAGE_DETECTED"
+      input_sha256 = $inputSha
+    }
+
+    $evidence = @{
+      schema_version = "wfsl-shell-guard.v1"
+      timestamp_utc  = $now
+      timestamp_trust = "system-clock"
+      producer = @{
+        system    = "wfsl-shell-guard"
+        component = "guard"
+        language  = "powershell"
+      }
+      payload = $payload
+    }
+
+    Emit-JsonAndExit -Evidence $evidence -ExitCode 2
+  }
+
+  # Default allow (structured or non-human input).
+  $payload = @{
+    verdict     = "ALLOW"
+    code        = "OK"
+    input_sha256 = $inputSha
+  }
+
+  $evidence = @{
+    schema_version = "wfsl-shell-guard.v1"
+    timestamp_utc  = $now
+    timestamp_trust = "system-clock"
+    producer = @{
+      system    = "wfsl-shell-guard"
+      component = "guard"
+      language  = "powershell"
+    }
+    payload = $payload
+  }
+
+  Emit-JsonAndExit -Evidence $evidence -ExitCode 0
+
+} catch {
+  $err = $_
+  $evidence = @{
+    error = @{
+      schema_version = "wfsl-error.v1"
+      error_class    = "WFSL_SHELL_GUARD_FAILURE"
+      message        = ($err.Exception.Message)
+      timestamp_utc  = (Get-Date).ToUniversalTime().ToString("o")
+    }
+  }
+  Emit-JsonAndExit -Evidence $evidence -ExitCode 1
+}

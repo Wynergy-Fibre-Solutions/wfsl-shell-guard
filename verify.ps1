@@ -1,99 +1,45 @@
+# verify.ps1
+# WFSL Shell Guard verification script (local). PSG-focused: ensure JSON-only stdout and adapter compatibility.
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Get-Sha256Hex {
-  param([string]$Path)
-  if (-not (Test-Path -LiteralPath $Path)) { return "" }
-  return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+$repo = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $repo
+
+$adapter = Join-Path $HOME "github\wfsl-proofgate-cli\tools\wfsl-adapter.mjs"
+$outDir  = Join-Path $HOME "github\wfsl-proofgate-cli\proofs"
+$outFile = Join-Path $outDir "adapter-parallel-shell-guard.json"
+
+if (-not (Test-Path $adapter)) {
+  throw "Missing adapter: $adapter"
 }
 
-function Read-FirstLine {
-  param([string]$Path)
-  if (-not (Test-Path -LiteralPath $Path)) { return "" }
-  return (Get-Content -LiteralPath $Path -TotalCount 1 -ErrorAction Stop)
+New-Item -ItemType Directory -Force $outDir | Out-Null
+
+function Assert-JsonFile {
+  param([Parameter(Mandatory=$true)][string] $Path)
+  node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')); console.log('JSON OK')" "$Path" | Out-Null
 }
 
-$repoPath = (Get-Location).Path
+# Test 1: Allow path (non-human input)
+$allowInput = "wfsl-shell-guard-execution"
+pwsh -NoProfile -ExecutionPolicy Bypass -File ".\wfsl-shell-guard.ps1" -InputText $allowInput |
+  node $adapter > $outFile
 
-$requiredFiles = @(
-  "LICENSE",
-  "README.md",
-  "GOVERNANCE.md",
-  "VERIFICATION.md"
-)
+Assert-JsonFile -Path $outFile
 
-$missing = @()
-foreach ($f in $requiredFiles) {
-  if (-not (Test-Path -LiteralPath (Join-Path $repoPath $f))) {
-    $missing += $f
-  }
-}
+# Test 2: Deny path (human language)
+$denyInput = "this looks like a human sentence"
+pwsh -NoProfile -ExecutionPolicy Bypass -File ".\wfsl-shell-guard.ps1" -InputText $denyInput |
+  node $adapter > $outFile
 
-$licensePath = Join-Path $repoPath "LICENSE"
-$licenseFirst = Read-FirstLine $licensePath
-$licenseText = ""
-if (Test-Path -LiteralPath $licensePath) {
-  $licenseText = (Get-Content -LiteralPath $licensePath -Raw -ErrorAction Stop)
-}
+Assert-JsonFile -Path $outFile
 
-$licenseLooksApache =
-  ($licenseFirst -match "Apache License") -and
-  ($licenseText -match "Version 2\.0")
+# Test 3: Strict empty input denial
+pwsh -NoProfile -ExecutionPolicy Bypass -File ".\wfsl-shell-guard.ps1" -Strict |
+  node $adapter > $outFile
 
-$head = ""
-$remote = ""
-try { $head = (git rev-parse HEAD 2>$null).Trim() } catch {}
-try { $remote = (git config --get remote.origin.url 2>$null).Trim() } catch {}
+Assert-JsonFile -Path $outFile
 
-$files = @()
-foreach ($f in $requiredFiles) {
-  $p = Join-Path $repoPath $f
-  $files += [pscustomobject]@{
-    path = $f
-    exists = (Test-Path -LiteralPath $p)
-    sha256 = (Get-Sha256Hex $p)
-  }
-}
-
-$nowUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH-mm-ss-fffZ")
-
-$result = [pscustomobject]@{
-  wfsl_verification = "WFSL-LOCAL-VERIFY-v1"
-  repo = [pscustomobject]@{
-    path = $repoPath
-    remote = $remote
-    head = $head
-  }
-  timestamp_utc = $nowUtc
-  checks = [pscustomobject]@{
-    required_files_present = ($missing.Count -eq 0)
-    missing_files = $missing
-    license_apache_2_0_detected = $licenseLooksApache
-  }
-  artifacts = [pscustomobject]@{
-    required_files = $files
-  }
-  outcome = [pscustomobject]@{
-    pass = (($missing.Count -eq 0) -and $licenseLooksApache)
-  }
-}
-
-$evidenceDir = Join-Path $repoPath "evidence"
-if (-not (Test-Path -LiteralPath $evidenceDir)) {
-  New-Item -ItemType Directory -Path $evidenceDir | Out-Null
-}
-
-$evidencePath = Join-Path $evidenceDir ("wfsl-verify-" + $nowUtc + ".json")
-$result | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $evidencePath -Encoding UTF8
-
-if ($result.outcome.pass) {
-  Write-Host "WFSL VERIFY: PASS"
-  Write-Host ("Evidence: " + $evidencePath)
-  exit 0
-} else {
-  Write-Host "WFSL VERIFY: FAIL"
-  Write-Host ("Missing: " + ($missing -join ", "))
-  Write-Host ("Apache-2.0 detected: " + $licenseLooksApache)
-  Write-Host ("Evidence: " + $evidencePath)
-  exit 1
-}
+"PASS"

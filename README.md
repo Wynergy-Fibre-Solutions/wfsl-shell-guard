@@ -1,13 +1,68 @@
-## Governance alignment
+## \# WFSL Shell Guard
 
-WFSL Shell Guard operates under the authority of the
-WFSL Control and Execution Governance Charter.
+## 
 
-The charter defines the non-negotiable principles governing execution authority,
-deny-by-default posture, and control boundaries across WFSL systems.
+## Deterministic command and execution guard for WFSL systems.
 
-This project implements execution-level controls that are justified by,
-and subordinate to, that charter.
+## 
 
-Authoritative charter:
-https://github.com/Wynergy-Fibre-Solutions/wfsl-core/blob/main/WFSL_CONTROL_EXECUTION_GOVERNANCE_CHARTER.md
+## WFSL Shell Guard enforces strict execution boundaries for shell-level operations used within WFSL tooling and pipelines. It prevents implicit execution, dynamic behaviour, and unverified command paths.
+
+## 
+
+## All decisions are made deterministically based on declared policy and invariant rules.
+
+## 
+
+## \## Capabilities
+
+## \- Deterministic command admission
+
+## \- Explicit allow and deny rules
+
+## \- Prevention of implicit or side-effect execution
+
+## \- Evidence-backed execution decisions
+
+## \- Integration with WFSL verification and governance pipelines
+
+## 
+
+## \## Scope
+
+## WFSL Shell Guard operates strictly at the command and execution boundary.
+
+## It does not perform orchestration, remediation, or policy authoring.
+
+## 
+
+## This component enforces decisions defined elsewhere in the WFSL governance stack.
+
+## 
+
+## \## Intended users
+
+## \- WFSL core systems
+
+## \- Licensed WFSL tooling
+
+## \- Internal execution and verification pipelines
+
+## 
+
+## This component is not intended for general-purpose shell usage or end-user scripting.
+
+## 
+
+## \## Licence tier
+
+## WFSL-PAID
+
+## 
+
+## This repository forms part of WFSL’s licensed execution control and verification infrastructure.
+
+## Commercial use requires an appropriate WFSL licence.
+
+## 
+

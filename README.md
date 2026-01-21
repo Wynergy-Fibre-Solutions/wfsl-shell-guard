@@ -2,67 +2,193 @@
 
 ## 
 
-## Deterministic command and execution guard for WFSL systems.
+## \## Purpose
 
 ## 
 
-## WFSL Shell Guard enforces strict execution boundaries for shell-level operations used within WFSL tooling and pipelines. It prevents implicit execution, dynamic behaviour, and unverified command paths.
+## WFSL Shell Guard is the Tier-1 execution boundary guard within the WFSL platform.
 
 ## 
 
-## All decisions are made deterministically based on declared policy and invariant rules.
+## It validates, constrains, and attests to execution environments and command-level behaviour by consuming deterministic evidence emitted by WFSL Evidence Guard.
 
 ## 
 
-## \## Capabilities
-
-## \- Deterministic command admission
-
-## \- Explicit allow and deny rules
-
-## \- Prevention of implicit or side-effect execution
-
-## \- Evidence-backed execution decisions
-
-## \- Integration with WFSL verification and governance pipelines
+## This component exists to prove \*\*how\*\* something executed, not \*\*whether it should\*\*.
 
 ## 
 
-## \## Scope
-
-## WFSL Shell Guard operates strictly at the command and execution boundary.
-
-## It does not perform orchestration, remediation, or policy authoring.
+## ---
 
 ## 
 
-## This component enforces decisions defined elsewhere in the WFSL governance stack.
+## \## Execution Boundary Guarantees
 
 ## 
 
-## \## Intended users
-
-## \- WFSL core systems
-
-## \- Licensed WFSL tooling
-
-## \- Internal execution and verification pipelines
+## WFSL Shell Guard enforces and attests to:
 
 ## 
 
-## This component is not intended for general-purpose shell usage or end-user scripting.
+## \- Controlled execution contexts
+
+## \- Explicit command boundaries
+
+## \- Deterministic execution metadata
+
+## \- Environment integrity at runtime
 
 ## 
 
-## \## Licence tier
-
-## WFSL-PAID
+## All enforcement is evidence-backed and reproducible.
 
 ## 
 
-## This repository forms part of WFSL’s licensed execution control and verification infrastructure.
+## ---
 
-## Commercial use requires an appropriate WFSL licence.
+## 
+
+## \## What This Component Does Not Do
+
+## 
+
+## WFSL Shell Guard explicitly does \*\*not\*\*:
+
+## 
+
+## \- Emit primary truth
+
+## \- Perform inference
+
+## \- Decide policy
+
+## \- Authorise outcomes
+
+## \- Perform remediation
+
+## \- Replace upstream evidence sources
+
+## 
+
+## It consumes Tier-0 evidence and produces boundary attestations only.
+
+## 
+
+## ---
+
+## 
+
+## \## Evidence Consumption
+
+## 
+
+## This component consumes deterministic evidence originating from:
+
+## 
+
+## \- wfsl-evidence-guard (Platform Tier-0)
+
+## 
+
+## All attestations produced by this component must be traceable back to verified Tier-0 evidence.
+
+## 
+
+## If upstream evidence is absent, invalid, or unverifiable, execution must be treated as untrusted.
+
+## 
+
+## ---
+
+## 
+
+## \## Classification and Licence
+
+## 
+
+## \*\*Classification:\*\* WFSL Open  
+
+## \*\*Licence:\*\* Apache License 2.0
+
+## 
+
+## This repository is open-source and auditable.  
+
+## It forms part of the WFSL execution integrity layer.
+
+## 
+
+## ---
+
+## 
+
+## \## Execution and Verification
+
+## 
+
+## Verification consists of:
+
+## 
+
+## \- Validating upstream evidence integrity
+
+## \- Capturing execution context metadata
+
+## \- Emitting structured boundary attestations
+
+## \- Ensuring deterministic behaviour across runs
+
+## 
+
+## All verification is designed to operate locally and offline.
+
+## 
+
+## ---
+
+## 
+
+## \## Role in the WFSL Platform
+
+## 
+
+## WFSL Shell Guard is designated \*\*Platform Tier-1\*\*.
+
+## 
+
+## It sits immediately above the Tier-0 truth anchor and provides execution boundary assurance for:
+
+## 
+
+## \- Admission and policy guards
+
+## \- ProofGate CLI
+
+## \- Testing frameworks
+
+## \- Control-plane orchestration
+
+## \- Governance engines
+
+## 
+
+## No WFSL component may assert execution integrity without boundary evidence produced or validated by this layer.
+
+## 
+
+## ---
+
+## 
+
+## \## Stability
+
+## 
+
+## This repository is considered \*\*stable\*\* once execution boundary guarantees are verified.
+
+## 
+
+## Behavioural changes require explicit versioning and deterministic proof.
 
 ## 
 

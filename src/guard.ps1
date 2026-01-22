@@ -1,76 +1,46 @@
-<# 
-WFSL Shell Guard
-Version: Hardened v1
-Purpose:
-- Deterministic execution safety
-- Prompt contamination prevention
-- CI-safe, non-interactive enforcement
-
-No telemetry. No network access.
-#>
+# ============================================================
+# WFSL PowerShell Profile
+# Purpose:
+# - Establish WFSL governance invariants at shell startup
+# - Provide stable entrypoint to WFSL Shell Guard
+# - Eliminate path and setup errors permanently
+# ============================================================
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = "Stop"
 
-function Fail {
-    param([string]$Message)
-    Write-Error "[WFSL-SHELL-GUARD] $Message"
-    exit 1
+# ------------------------------------------------------------
+# WFSL ProofGate entry (single source of truth)
+# ------------------------------------------------------------
+$env:WFSL_PROOFGATE_ENTRY = "C:\Users\Paul Wynn\github\wfsl-proofgate-cli\dist\index.js"
+
+# ------------------------------------------------------------
+# WFSL Shell Guard entrypoint
+# ------------------------------------------------------------
+function wfsl {
+  param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Args
+  )
+
+  $guard = "C:\Users\Paul Wynn\github\wfsl-shell-guard\src\guard.ps1"
+
+  if (-not (Test-Path $guard)) {
+    Write-Error "WFSL Shell Guard not found at $guard"
+    return
+  }
+
+  pwsh -File $guard @Args
 }
 
-# ---------------------------------------------------------------------------
-# Guard 1: Raw command line inspection (authoritative)
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------
+# Optional quality-of-life aliases (safe)
+# ------------------------------------------------------------
+Set-Alias wfsl-git wfsl
+Set-Alias wfsl-clean wfsl
 
-$CommandLine = [Environment]::CommandLine
-
-if ($CommandLine -match 'PS\s+[A-Z]:\\') {
-    Fail "Prompt contamination detected. Remove 'PS C:\...' prefix."
-}
-
-if ($CommandLine -match '>\s*pwsh') {
-    Fail "Detected pasted console prompt redirection."
-}
-
-# ---------------------------------------------------------------------------
-# Guard 2: Invocation integrity
-# ---------------------------------------------------------------------------
-
-if (-not $MyInvocation.MyCommand.Path) {
-    Fail "Script must be invoked via explicit file path."
-}
-
-$ResolvedPath = (Resolve-Path $MyInvocation.MyCommand.Path).Path
-
-if (-not (Test-Path $ResolvedPath)) {
-    Fail "Invocation path resolution failed."
-}
-
-# ---------------------------------------------------------------------------
-# Guard 3: Interactive prompt paste detection
-# ---------------------------------------------------------------------------
-
-if ($Host.Name -eq 'ConsoleHost') {
-    $last = Get-History -Count 1 -ErrorAction SilentlyContinue
-    if ($last -and $last.CommandLine -match '^PS\s+[A-Z]:\\') {
-        Fail "Interactive prompt paste detected."
-    }
-}
-
-# ---------------------------------------------------------------------------
-# Guard 4: Execution policy neutrality
-# ---------------------------------------------------------------------------
-
-$policy = Get-ExecutionPolicy -Scope Process
-if ($policy -ne 'Bypass') {
-    Write-Host "[WFSL-SHELL-GUARD] ExecutionPolicy=$policy (allowed)"
-}
-
-# ---------------------------------------------------------------------------
-# PASS
-# ---------------------------------------------------------------------------
-
-Write-Host "[WFSL-SHELL-GUARD] Environment clean."
-Write-Host "[WFSL-SHELL-GUARD] Execution permitted."
-
-exit 0
+# ------------------------------------------------------------
+# Startup confirmation (quiet, non-noisy)
+# ------------------------------------------------------------
+# Uncomment if you want a visible confirmation each session
+# Write-Host "WFSL shell governance active"

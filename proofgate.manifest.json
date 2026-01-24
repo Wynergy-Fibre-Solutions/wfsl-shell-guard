@@ -1,0 +1,21 @@
+{
+  "name": "wfsl-shell-guard",
+  "version": "0.1.0",
+  "description": "WFSL Shell Guard. Enforces deterministic shell execution and emits structural repository evidence for ProofGate verification.",
+  "owner": "Wynergy Fibre Solutions Ltd",
+  "scope": "shell",
+  "guardType": "structural",
+  "tier": "opencore",
+  "entrypoint": null,
+  "artefacts": [
+    "wfsl.shell.repo.state.txt",
+    "wfsl.shell.repo.state.sha256",
+    "wfsl.shell.repo.verdict.json",
+    "wfsl.shell.proofgate.bundle.json"
+  ],
+  "determinism": {
+    "inputs": "git-working-tree",
+    "outputs": "deterministic-text-and-json",
+    "hash": "sha256"
+  }
+}

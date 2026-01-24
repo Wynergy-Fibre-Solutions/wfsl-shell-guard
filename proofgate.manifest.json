@@ -1,21 +1,19 @@
 {
-  "name": "wfsl-shell-guard",
+  "name": "wfsl-shared-verifier",
   "version": "0.1.0",
-  "description": "WFSL Shell Guard. Enforces deterministic shell execution and emits structural repository evidence for ProofGate verification.",
+  "description": "WFSL Shared Verifier. Cross-verifies ProofGate bundles across guards and emits a unified trust verdict.",
   "owner": "Wynergy Fibre Solutions Ltd",
-  "scope": "shell",
-  "guardType": "structural",
-  "tier": "opencore",
+  "scope": "verification",
+  "guardType": "shared-verifier",
+  "tier": "core",
   "entrypoint": null,
   "artefacts": [
-    "wfsl.shell.repo.state.txt",
-    "wfsl.shell.repo.state.sha256",
-    "wfsl.shell.repo.verdict.json",
-    "wfsl.shell.proofgate.bundle.json"
+    "wfsl.shared.inputs.json",
+    "wfsl.shared.verdict.json"
   ],
   "determinism": {
-    "inputs": "git-working-tree",
-    "outputs": "deterministic-text-and-json",
+    "inputs": "proofgate-bundles",
+    "outputs": "deterministic-json",
     "hash": "sha256"
   }
 }

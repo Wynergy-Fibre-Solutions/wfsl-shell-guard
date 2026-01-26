@@ -1,3 +1,7 @@
+## Commercial use requires a WFSL licence. See commercial-wfsl-offerings/HOW-TO-BUY.md.
+
+## 
+
 ## \# WFSL Shell Guard
 
 ## 
@@ -6,15 +10,15 @@
 
 ## 
 
-## WFSL Shell Guard is the Tier-1 execution boundary guard within the WFSL platform.
+## WFSL Shell Guard enforces strict execution boundaries between operators and system-level commands.
 
 ## 
 
-## It validates, constrains, and attests to execution environments and command-level behaviour by consuming deterministic evidence emitted by WFSL Evidence Guard.
+## It ensures that only explicitly permitted, structured commands are executed, and that all interactions are auditable and deterministic.
 
 ## 
 
-## This component exists to prove \*\*how\*\* something executed, not \*\*whether it should\*\*.
+## Shell Guard is designed to prevent accidental, implicit, or unsafe command execution.
 
 ## 
 
@@ -22,25 +26,25 @@
 
 ## 
 
-## \## Execution Boundary Guarantees
+## \## Functional Guarantees
 
 ## 
 
-## WFSL Shell Guard enforces and attests to:
+## WFSL Shell Guard provides:
 
 ## 
 
-## \- Controlled execution contexts
+## \- Explicit command allowlisting
 
-## \- Explicit command boundaries
+## \- Deterministic execution paths
 
-## \- Deterministic execution metadata
+## \- Clear rejection of undefined input
 
-## \- Environment integrity at runtime
+## \- Evidence-referenced execution outcomes
 
 ## 
 
-## All enforcement is evidence-backed and reproducible.
+## All permitted actions are intentional and traceable.
 
 ## 
 
@@ -52,49 +56,23 @@
 
 ## 
 
-## WFSL Shell Guard explicitly does \*\*not\*\*:
+## WFSL Shell Guard explicitly does not:
 
 ## 
 
-## \- Emit primary truth
+## \- Execute arbitrary shell input
 
-## \- Perform inference
+## \- Infer operator intent
 
-## \- Decide policy
+## \- Modify system state implicitly
 
-## \- Authorise outcomes
+## \- Bypass governance or admission layers
 
-## \- Perform remediation
-
-## \- Replace upstream evidence sources
+## \- Perform background automation
 
 ## 
 
-## It consumes Tier-0 evidence and produces boundary attestations only.
-
-## 
-
-## ---
-
-## 
-
-## \## Evidence Consumption
-
-## 
-
-## This component consumes deterministic evidence originating from:
-
-## 
-
-## \- wfsl-evidence-guard (Platform Tier-0)
-
-## 
-
-## All attestations produced by this component must be traceable back to verified Tier-0 evidence.
-
-## 
-
-## If upstream evidence is absent, invalid, or unverifiable, execution must be treated as untrusted.
+## It enforces boundaries only.
 
 ## 
 
@@ -102,45 +80,29 @@
 
 ## 
 
-## \## Classification and Licence
+## \## Execution Model
 
 ## 
 
-## \*\*Classification:\*\* WFSL Open  
-
-## \*\*Licence:\*\* Apache License 2.0
+## WFSL Shell Guard operates as a controlled execution layer.
 
 ## 
 
-## This repository is open-source and auditable.  
-
-## It forms part of the WFSL execution integrity layer.
+## Commands must be:
 
 ## 
 
-## ---
+## \- Explicitly declared
+
+## \- Structurally valid
+
+## \- Context-aware
+
+## \- Deterministically executable
 
 ## 
 
-## \## Execution and Verification
-
-## 
-
-## Verification consists of:
-
-## 
-
-## \- Validating upstream evidence integrity
-
-## \- Capturing execution context metadata
-
-## \- Emitting structured boundary attestations
-
-## \- Ensuring deterministic behaviour across runs
-
-## 
-
-## All verification is designed to operate locally and offline.
+## Invalid or undeclared commands must fail explicitly.
 
 ## 
 
@@ -152,27 +114,47 @@
 
 ## 
 
-## WFSL Shell Guard is designated \*\*Platform Tier-1\*\*.
+## WFSL Shell Guard occupies a boundary enforcement tier within the WFSL platform.
 
 ## 
 
-## It sits immediately above the Tier-0 truth anchor and provides execution boundary assurance for:
+## It is used by:
 
 ## 
 
-## \- Admission and policy guards
+## \- WFSL ProofGate CLI
 
-## \- ProofGate CLI
+## \- Operator workflows
 
-## \- Testing frameworks
+## \- Demonstration environments
 
-## \- Control-plane orchestration
-
-## \- Governance engines
+## \- Controlled execution pipelines
 
 ## 
 
-## No WFSL component may assert execution integrity without boundary evidence produced or validated by this layer.
+## No system-level action within WFSL should occur without passing through this boundary.
+
+## 
+
+## ---
+
+## 
+
+## \## Classification and Licence
+
+## 
+
+## Classification: WFSL Open  
+
+## Licence: Apache License 2.0
+
+## 
+
+## This repository is open-source and auditable.
+
+## 
+
+## Commercial and production reliance requires a valid WFSL licence.
 
 ## 
 
@@ -184,11 +166,11 @@
 
 ## 
 
-## This repository is considered \*\*stable\*\* once execution boundary guarantees are verified.
+## This repository is considered stable once execution rules and rejection behaviour are fixed.
 
 ## 
 
-## Behavioural changes require explicit versioning and deterministic proof.
+## Any expansion of permitted command scope requires explicit versioning and documentation.
 
 ## 
 
